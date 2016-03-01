@@ -19,16 +19,24 @@ router.get('/', function(req, res, next)
 
 
 //user inputs username to create account or retrieve account
-router.get('/login/:username', function(req,res,next)
+router.get('/login/:username/:region', function(req,res,next)
 {
 	var tempUsername = req.params.username;
+	var tempRegion = req.params.region;
 	usersRef.equalTo(tempUsername).on("child_added", function(snapshot){
 		if(snapshot == null)
 		{
 			
-			usersRef.child(tempUsername).set({
+			riot.getSummoner({
+				'region': tempRegion,
+				'summonerName': tempUsername
+			},
+			function(data)
+			{
+				res.send(data);
+			}
+			});
 
-			})
 		}
 		else
 		{
