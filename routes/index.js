@@ -23,6 +23,7 @@ router.get('/login/:username/:region', function(req,res,next)
 {
 	var tempUsername = req.params.username;
 	var tempRegion = req.params.region;
+	res.send(tempUsername + tempRegion);
 	usersRef.equalTo(tempUsername).on("child_added", function(snapshot){
 		if(snapshot == null)
 		{
@@ -36,7 +37,7 @@ router.get('/login/:username/:region', function(req,res,next)
 				res.send(data);
 			});
 			*/
-			res.send("Here");
+			//res.send("Here");
 		}
 		else
 		{
