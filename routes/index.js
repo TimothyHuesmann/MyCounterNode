@@ -8,7 +8,7 @@ var RiotApi = require('riot-api');
 
 var riot = new RiotApi('6778425b-daf6-4633-b583-64ca87e5f6cf');
 
-var ref = new Firebase("https://mycounter-app.firebaseio.com/");
+var ref = new Firebase("https://mycounter-app.firebaseio.com/web/data");
 var usersRef = ref.child("users");
 
 //base get function
@@ -26,7 +26,7 @@ router.get('/login/:username/:region', function(req,res,next)
 	usersRef.equalTo(tempUsername).on("child_added", function(snapshot){
 		if(snapshot == null)
 		{
-			
+			/*
 			riot.getSummoner({
 				'region': tempRegion,
 				'summonerName': tempUsername
@@ -35,7 +35,8 @@ router.get('/login/:username/:region', function(req,res,next)
 			{
 				res.send(data);
 			});
-
+			*/
+			res.send("Here");
 		}
 		else
 		{
