@@ -34,7 +34,6 @@ router.get('/login/:username/:region', function(req,res,next)
 			function(data)
 			{
 				res.send(data);
-			}
 			});
 
 		}
