@@ -23,7 +23,7 @@ router.get('/login/:username/:region', function(req,res,next)
 {
 	var tempUsername = req.params.username;
 	var tempRegion = req.params.region;
-	usersRef.once(tempUsername, function(snapshot){
+	usersRef.once('value', function(snapshot){
 		if(snapshot == null)
 		{
 			/*
