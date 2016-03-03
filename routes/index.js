@@ -8,8 +8,8 @@ var RiotApi = require('riot-api');
 
 var riot = new RiotApi('6778425b-daf6-4633-b583-64ca87e5f6cf');
 
-var ref = new Firebase("https://mycounter-app.firebaseio.com/web/data");
-var usersRef = ref.child("users");
+var ref = new Firebase("https://mycounter-app.firebaseio.com");
+var usersRef = ref.child("user");
 
 //base get function
 router.get('/', function(req, res, next)
@@ -23,8 +23,7 @@ router.get('/login/:username/:region', function(req,res,next)
 {
 	var tempUsername = req.params.username;
 	var tempRegion = req.params.region;
-	res.send(tempUsername + tempRegion);
-	usersRef.equalTo(tempUsername).on("child_added", function(snapshot){
+	usersRef.once(tempUsername, function(snapshot){
 		if(snapshot == null)
 		{
 			/*
@@ -37,7 +36,7 @@ router.get('/login/:username/:region', function(req,res,next)
 				res.send(data);
 			});
 			*/
-			//res.send("Here");
+			res.send("Here");
 		}
 		else
 		{
