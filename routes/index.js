@@ -36,11 +36,11 @@ router.get('/login/:username/:region', function(req,res,next)
 				res.send(data);
 			});
 			*/
-			res.send("Here");
+			res.send("not Here");
 		}
 		else
 		{
-
+			res.send("here");
 		}
 	})
 })
