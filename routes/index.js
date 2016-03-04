@@ -40,7 +40,7 @@ router.get('/login/:username/:region', function(req,res,next)
 		}
 		else
 		{
-			res.send("here");
+			res.send(snapshot);
 		}
 	})
 })
