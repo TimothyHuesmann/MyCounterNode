@@ -4,12 +4,11 @@ var router = express.Router();
 var fs = require('fs');
 var schedule = require('node-schedule');
 var firebase = require('firebase');
-var RiotApi = require('riot-api');
-
-var riot = new RiotApi('6778425b-daf6-4633-b583-64ca87e5f6cf');
+var apiKey = '6778425b-daf6-4633-b583-64ca87e5f6cf';
 
 var ref = new Firebase("https://mycounter-app.firebaseio.com");
 var usersRef = ref.child("user");
+var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
 //base get function
 router.get('/', function(req, res, next)
@@ -26,23 +25,37 @@ router.get('/login/:username/:region', function(req,res,next)
 	usersRef.on("value", function(snapshot){
 		if(snapshot == null)
 		{
-			/*
-			riot.getSummoner({
-				'region': tempRegion,
-				'summonerName': tempUsername
-			},
-			function(data)
-			{
-				res.send(data);
-			});
-			*/
-			res.send("not Here");
+			res.send("ERROR: NO DATA");
 		}
 		else
 		{
-			res.send(snapshot.val());
+			var exists = false;
+			var obj = snapshot.val();
+			var exists = snapshot.child(tempUsername).exists();
+			
+
+			if(snapshot.child(tempUsername) == true)
+			{
+
+			}
+			else
+			{
+				var query = 'https://global.api.pvp.net/api/lol/'+tempRegion+'/v1.4/summoner/by-name/'+tempUsername+'?api_key='+apiKey;
+				var jsonObj = JSON.parse(Get(query));
+				
+				
+			}
+			
 		}
 	})
 })
+
+
+function Get(yourUrl) {
+	var Httpreq = new XMLHttpRequest(); // a new request
+	Httpreq.open("GET",yourUrl,false);
+	Httpreq.send(null);
+	return Httpreq.responseText;
+}
 
 module.exports = router;

@@ -15,9 +15,10 @@
     "express": "~4.13.1",
     "firebase": "^2.4.1",
     "jade": "~1.11.0",
+    "lol-js": "*",
     "morgan": "~1.6.1",
     "node-schedule": "*",
-    "riot-api": "*",
-    "serve-favicon": "~2.3.0"
+    "serve-favicon": "~2.3.0",
+    "xmlhttprequest": "^1.8.0"
   }
 }
