@@ -42,12 +42,10 @@ router.get('/login/:username/:region', function(req,res,next)
 		
 			if(snapshot.child(tempUsername).exists() == true) //username exists in the database -> proceed to login
 			{
-
+				
 			}
 			else //username doesn't exist in databse, create user account then login
 			{
-				
-
 				
 			}
 			
