@@ -22,32 +22,39 @@ router.get('/login/:username/:region', function(req,res,next)
 {
 	var tempUsername = req.params.username;
 	var tempRegion = req.params.region;
-	usersRef.on("value", function(snapshot){
-		if(snapshot == null)
+	var query = 'https://global.api.pvp.net/api/lol/'+tempRegion+'/v1.4/summoner/by-name/'+tempUsername+'?api_key='+apiKey;
+	var jsonObj = JSON.parse(Get(query));			
+	if(jsonObj.status != null)							//Checking if the username exists in League of Legends
+	{
+		console.log('not found');
+		console.log(jsonObj);
+	}
+	else
+	{
+		usersRef.on("value", function(snapshot){		//Checking to see if username exists in Firebase already
+		if(snapshot == null)	//Firebase has an error
 		{
-			res.send("ERROR: NO DATA");
+			res.send("ERROR: NO DATA");			
 		}
-		else
+		else	//Data gathered
 		{
-			var exists = false;
 			var obj = snapshot.val();
-			var exists = snapshot.child(tempUsername).exists();
-			
-
-			if(snapshot.child(tempUsername) == true)
+		
+			if(snapshot.child(tempUsername).exists() == true) //username exists in the database -> proceed to login
 			{
 
 			}
-			else
+			else //username doesn't exist in databse, create user account then login
 			{
-				var query = 'https://global.api.pvp.net/api/lol/'+tempRegion+'/v1.4/summoner/by-name/'+tempUsername+'?api_key='+apiKey;
-				var jsonObj = JSON.parse(Get(query));
 				
+
 				
 			}
 			
 		}
 	})
+	}
+	
 })
 
 
