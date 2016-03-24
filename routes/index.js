@@ -46,7 +46,7 @@ router.get('/login/:username/:region', function(req,res,next)
 			}
 			else //username doesn't exist in databse, create user account then login
 			{
-				
+				res.send(tempUsername + ',' + tempRegion);
 			}
 			
 		}
