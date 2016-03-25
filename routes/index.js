@@ -10,6 +10,7 @@ var ref = new Firebase("https://mycounter-app.firebaseio.com");
 var usersRef = ref.child("user");
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
+
 //base get function
 router.get('/', function(req, res, next)
 {
@@ -46,7 +47,7 @@ router.get('/login/:username/:region', function(req,res,next)
 			}
 			else //username doesn't exist in databse, create user account then login
 			{
-				res.send(tempUsername + ',' + tempRegion);
+				
 			}
 			
 		}
@@ -61,6 +62,21 @@ function Get(yourUrl) {
 	Httpreq.open("GET",yourUrl,false);
 	Httpreq.send(null);
 	return Httpreq.responseText;
+}
+
+function createFirebaseAccount(username, region)
+{
+	var query = 'https://global.api.pvp.net/api/lol/static-data/' + region + '/v1.2/champion?api_key=' + apiKey;
+	var champJSON = JSON.parse(Get(query));
+	if(champJSON.status != null)
+	{
+		console.log("Error");					//No data found or error (most likely an error)
+		console.log(champJSON);
+	}
+	else
+	{
+		console.log(champJSON.data);
+	}
 }
 
 module.exports = router;
