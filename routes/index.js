@@ -47,6 +47,11 @@ router.get('/login/:username/:region', function(req,res,next)
 			if(snapshot.child(tempUsername).exists() == true) //username exists in the database -> proceed to login
 			{
 				var region = tempRegion.toLowerCase();
+				
+				usersRef.child(tempUsername).on("value", function(snapshot2)
+				{
+					res.send(snapshot2.val().statistics);
+				})
 
 			}
 			else //username doesn't exist in databse, create user account then login
@@ -110,6 +115,7 @@ router.get('/login/:username/:region', function(req,res,next)
 							statistics: statisticsString	
 					});
 					
+					res.send(statisticsString);
 
 				}
 			}
