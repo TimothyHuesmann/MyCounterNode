@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-
+var cron = require('cron');
 var fs = require('fs');
 var schedule = require('node-schedule');
 var firebase = require('firebase');
@@ -47,12 +47,13 @@ router.get('/login/:username/:region', function(req,res,next)
 			if(snapshot.child(tempUsername).exists() == true) //username exists in the database -> proceed to login
 			{
 				var region = tempRegion.toLowerCase();
-				
+			/*	
 				usersRef.child(tempUsername).on("value", function(snapshot2)
 				{
 					res.send(snapshot2.val().statistics);
 				})
-
+				updateStats(summonerID, tempRegion, tempUsername);
+			*/
 			}
 			else //username doesn't exist in databse, create user account then login
 			{
@@ -67,36 +68,30 @@ router.get('/login/:username/:region', function(req,res,next)
 				}
 				else
 				{	
-					var championString = '{"Champion Data":{';
-					for(var i = 0; i<Object.keys(champJSON.data).length;i++)	//starts the JSON string creation
-					{
-						championString+= '"' + Object.keys(champJSON.data)[i] + '"' + ':{"with":{';
-						for(var j=0; j<Object.keys(champJSON.data).length;j++)   //builds the "Playing with" part of the JSON String
-						{
-							championString+= '"' + Object.keys(champJSON.data)[j] + '"' + ':"0-0"';
-							if(j != Object.keys(champJSON.data).length-1)
-							{
-								championString+=',';
-							}
-						}
-						championString+= '}, "against":{';
-						for(var k=0; k<Object.keys(champJSON.data).length;k++) //builds the "playing against" part of the JSON String
-						{
-							championString+= '"' + Object.keys(champJSON.data)[k] + '"' + ':"0-0"';
-							if(k != Object.keys(champJSON.data).length-1)
-							{
-								championString+=',';
-							}
-						}
-						championString+='}}';
-						if(i != Object.keys(champJSON.data).length-1)
-						{
-							championString+=',';
-						}
-						
-					}
+					usersRef.child(tempUsername).set({
+							region: tempRegion,
+							summonerId: summonerID,
+							gamesList: '',
+							username: tempUsername	
+					});
 
-					championString+= '}}';
+					championDataRef = usersRef.child(tempUsername).child("championData");
+
+					for(var i = 0; i < Object.keys(champJSON.data).length;i++)
+					{
+						var tempChamp = Object.keys(champJSON.data)[i];
+					}
+					for(var g = 0; g < Object.keys(champJSON.data).length;g++)
+					{
+						var tempBaseChamp = Object.keys(champJSON.data)[g];
+						var champWithRef = championDataRef.child(tempChamp).with;
+						for(var k = 0; k < Object.keys(champJSON.data).length;k++)
+						{
+							var tempWithChamp = Object.keys(champJSON.data)[k];
+							var tempChampWithRef = new Firebase("https://mycounter-app.firebaseio.com/user/" + tempUsername + "/championData/" + tempBaseChamp + "/with/" + tempWithChamp);
+							tempChampWithRef.set('0-0-0-0');
+						}		
+					}
 
 					var query3 = 'https://global.api.pvp.net/api/lol/' + tempRegion.toLowerCase() + '/v1.3/stats/by-summoner/' + summonerID + '/summary?api_key=' + apiKey;
 					var statsJSON = JSON.parse(Get(query3));
@@ -107,16 +102,20 @@ router.get('/login/:username/:region', function(req,res,next)
 					var totalTurrets = parseInt(statsJSON.playerStatSummaries[7].aggregatedStats.totalTurretsKilled) + parseInt(statsJSON.playerStatSummaries[9].aggregatedStats.totalTurretsKilled);
 					var totalAssists = parseInt(statsJSON.playerStatSummaries[7].aggregatedStats.totalAssists) + parseInt(statsJSON.playerStatSummaries[9].aggregatedStats.totalAssists);
 					
-					statisticsString = '{"stats": {"wins":'+ totalWins + ',"kills":'+totalKills+',"cs":' + totalCS+',"totalTurrets":'+totalTurrets+',"totalAssists":'+totalAssists+'}}';
+					//statisticsString = '{"stats": {"wins":'+ totalWins + ',"kills":'+totalKills+',"cs":' + totalCS+',"totalTurrets":'+totalTurrets+',"totalAssists":'+totalAssists+'}}';
 					
-					usersRef.child(tempUsername).set({
-							championData: championString,
-							region: tempRegion,
-							statistics: statisticsString	
+					usersRef.child(tempUsername).child("statistics").set({
+						wins: totalWins,
+						kills: totalKills,
+						CS: totalCS,
+						Turrets: totalTurrets,
+						Assists: totalAssists
 					});
 					
-					res.send(statisticsString);
+					res.send(usersRef.child(tempUsername.statistics));
 
+					//updateStats(summonerID, tempRegion, tempUsername);
+				
 				}
 			}
 			
@@ -126,17 +125,106 @@ router.get('/login/:username/:region', function(req,res,next)
 	
 })
 
+router.get("/counterAgainst/:username")
+{
 
-function Get(yourUrl) {
+}
+
+router.get("/counterWith/:username")
+{
+
+}
+
+function Get(yourUrl) 
+{
 	var Httpreq = new XMLHttpRequest(); // a new request
 	Httpreq.open("GET",yourUrl,false);
 	Httpreq.send(null);
 	return Httpreq.responseText;
 }
 
-function createFirebaseAccount(username, region)
+function updateStats(userID, region, username)
 {
-	
+	var query4 = 'https://global.api.pvp.net/api/lol/' + region.toLowerCase() + '/v1.3/game/by-summoner/' + userID + '/recent?api_key=' + apiKey;
+	console.log(query4);
+	var gamesJSON = JSON.parse(Get(query4));
+	console.log(gamesJSON);
+	var teams = [];
+	var teamChamps = [];
+	var enemyChamps = [];
+	var teamNames = [];
+	var enemyNames = [];
+	var win = true;
+	usersRef.child(username).on("value", function(snapshot)
+	{
+		var userChampStats = snapshot.val().championData;
+		console.log(userChampStats['championStats']);
+		for(var i = 0; i< Object.keys(gamesJSON.games).length;i++)
+		{
+			var meQuery = 'https://global.api.pvp.net/api/lol/static-data/' + region.toLowerCase() + '/v1.2/champion/' + gamesJSON.games[i].championId + '?api_key=' + apiKey;
+			var meJSON = JSON.parse(Get(meQuery));
+			var me = meJSON.key;
+			console.log(me);
+			myTeam = gamesJSON.games[i].teamId;
+			win = gamesJSON.games[i].stats.win;
+			console.log(myTeam);
+			for(var j = 0; j< 9;j++)
+			{
+				if(gamesJSON.games[i].fellowPlayers[j].teamId == myTeam)
+				{
+					var champQuery = 'https://global.api.pvp.net/api/lol/static-data/' + region.toLowerCase() + '/v1.2/champion/' + gamesJSON.games[i].fellowPlayers[j].championId + '?api_key=' + apiKey;
+					var tempJSON = JSON.parse(Get(champQuery));
+					teamNames.push(tempJSON.key);
+				}
+				else
+				{
+					var champQuery = 'https://global.api.pvp.net/api/lol/static-data/' + region.toLowerCase() + '/v1.2/champion/' + gamesJSON.games[i].fellowPlayers[j].championId + '?api_key=' + apiKey;
+					var tempJSON = JSON.parse(Get(champQuery));
+					enemyNames.push(tempJSON.key);
+				}
+			}
+			var champStatsRef = new Firebase("https://mycounter-app.firebaseio.com/users/" + username);
+			if(win == true)
+			{
+
+				for(var k = 0; k< teamNames.length;k++)
+				{
+					
+					//console.log(userChampStats.ChampionData[me].with[teamNames[k]])
+				}
+				for(var g = 0; g < enemyNames.length;g++)
+				{
+
+				}
+			}
+			else
+			{
+				for(var k = 0; k< teamNames.length;k++)
+				{
+					
+				}
+				for(var g = 0; g < enemyNames.length;g++)
+				{
+					
+				}
+			}
+			teamNames = [];
+			enemyNames = [];
+		}
+
+	})
+
 }
+
+var cronJob = cron.job("0 0 * * * *", function()
+{
+	usersRef.forEach(function(childSnapshot){
+		var tempUser = childSnapshot.summonerID;
+		var tempR = childSnapshot.region;
+		var username = childSnapshot.username;
+		updateStats(tempUser, tempR, username);
+	});
+});
+cronJob.start();
 
 module.exports = router;
