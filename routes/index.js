@@ -93,15 +93,167 @@ router.get('/login/:username/:region', function(req,res,next)
 	
 })
 
-router.get("/counterAgainst/:username/:champion")
+router.get("/counterAgainst/:username/:champion", function(req, res, next)
 {
+	var username = req.params.username;
+	var champion = req.params.champion;
+	var championRef = new Firebase("https://mycounter-app.firebaseio.com/user/" + username + "/champData");
+	var topThree = {};
+	championRef.once("value", function(snapshot)
+	{
+		snapshot.forEach(function(childSnapshot)
+		{
+			if(childSnapshot.child(champion).exists() == true)
+			{
+				tempRecords = childSnapshot.child(champion).val().split('-');
+				tempRecord = tempRecords[2];
+				tempName = childSnapshot.key();
 
-}
+				if(topThree[0] != null)
+				{
+					if(parseInt(topThree[0]["number"]) <= tempRecord)
+					{
+						topThree[2] = topThree[1];
+						topThree[1] = topThree[0];
+						topThree[0] = {"name":tempName, "record":tempRecord};
+					}
+					else
+					{ 
+						if(topThree[1] != null)
+						{
+							if(parseInt(topThree[1]["number"]) <= tempRecord)
+							{
+								topThree[2] = topThree[1];
+								topThree[1] = {"name":tempName, "record":tempRecord};
+							}
+							else
+							{
+								if(topThree[2] != null)
+								{
+									if(parseInt(topThree[2]["number"]) <= tempRecord)
+									{
+										topThree[2] = {"name":tempName, "record":tempRecord};
+									}
+								}
+								else
+								{
+									if(tempRecord != 0)
+									{
+										topThree[2] = {"name":tempName, "record":tempRecord};
+									}
+								}
+							}
+						}
+						else
+						{
+							if(tempRecord != 0)
+							{
+								topThree[1] = {"name":tempName, "record":tempRecord};
+							}
+						}
+						
+					}
+				}
+				else
+				{
+					if(tempRecord != 0)
+					{
+						topThree[0] = {"name":tempName, "record":tempRecord};
+					}
+				}
+			}
+		});
+		if(topThree != null)
+		{
+			res.send(topThree);
+		}
+		else
+		{
+			res.send("No Data Availible");
+		}
+	});
+})
 
-router.get("/counterWith/:username:/:champion")
+router.get("/counterWith/:username/:champion", function(req, res, next)
 {
+	var username = req.params.username;
+	var champion = req.params.champion;
+	var championRef = new Firebase("https://mycounter-app.firebaseio.com/user/" + username + "/champData");
+	var topThree = {};
+	championRef.once("value", function(snapshot)
+	{
+		snapshot.forEach(function(childSnapshot)
+		{
+			if(childSnapshot.child(champion).exists() == true)
+			{
+				tempRecords = childSnapshot.child(champion).val().split('-');
+				tempRecord = tempRecords[0];
+				tempName = childSnapshot.key();
 
-}
+				if(topThree[0] != null)
+				{
+					if(parseInt(topThree[0]["number"]) <= tempRecord)
+					{
+						topThree[2] = topThree[1];
+						topThree[1] = topThree[0];
+						topThree[0] = {"name":tempName, "record":tempRecord};
+					}
+					else
+					{ 
+						if(topThree[1] != null)
+						{
+							if(parseInt(topThree[1]["number"]) <= tempRecord)
+							{
+								topThree[2] = topThree[1];
+								topThree[1] = {"name":tempName, "record":tempRecord};
+							}
+							else
+							{
+								if(topThree[2] != null)
+								{
+									if(parseInt(topThree[2]["number"]) <= tempRecord)
+									{
+										topThree[2] = {"name":tempName, "record":tempRecord};
+									}
+								}
+								else
+								{
+									if(tempRecord != 0)
+									{
+										topThree[2] = {"name":tempName, "record":tempRecord};
+									}
+								}
+							}
+						}
+						else
+						{
+							if(tempRecord != 0)
+							{
+								topThree[1] = {"name":tempName, "record":tempRecord};
+							}
+						}
+						
+					}
+				}
+				else
+				{
+					if(tempRecord != 0)
+					{
+						topThree[0] = {"name":tempName, "record":tempRecord};
+					}
+				}
+			}
+		});
+		if(topThree != null)
+		{
+			res.send(topThree);
+		}
+		else
+		{
+			res.send("No Data Availible");
+		}
+	});
+})
 
 function Get(yourUrl) 
 {
