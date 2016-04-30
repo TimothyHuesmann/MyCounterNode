@@ -358,7 +358,7 @@ function updateStats(userID, region, username)
 		if(data == null){}
 		else
 		{
-			sendUpdate(data, me, username);
+			sendUpdate(data, me, username, gameID);
 		}
 	});
 }
@@ -366,10 +366,13 @@ function updateStats(userID, region, username)
 
 
 
-function sendUpdate(data, champ, username)
+function sendUpdate(data, champ, username, game)
 {
 	var tempRef = new Firebase("https://mycounter-app.firebaseio.com/user/" + username + "/championData/" + champ);
 	tempRef.update(data);
+	usersRef.update({
+		game : game
+	});
 }
 
 function getStats(region, summonerID)
