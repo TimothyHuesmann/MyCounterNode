@@ -250,7 +250,7 @@ router.get("/counterWith/:username/:champion", function(req, res, next)
 		}
 		else
 		{
-			res.send("No Data Availible");
+			res.send("No Data Available");
 		}
 	});
 })
