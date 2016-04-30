@@ -244,7 +244,7 @@ router.get("/counterWith/:username/:champion", function(req, res, next)
 				}
 			}
 		});
-		if(topThree != {})
+		if(topThree[0] != null)
 		{
 			res.send(topThree);
 		}
